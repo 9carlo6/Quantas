@@ -142,7 +142,7 @@ for line in sandbox_lines:
 sandbox_file.close()
 
 # Creazione file di analisi globale (sandbox + log)
-with open('/home/tsec/reports/cowrie_report.csv','w',newline='') as out_file:
+with open('/home/tsec/Quantas/tpot/reports/cowrie_report.csv','w',newline='') as out_file:
     writer = csv.writer(out_file)
     writer.writerow(header)
 
@@ -176,24 +176,24 @@ for log in tpot_json:
         row, error_code = normalize_json(single_sandbox_json, log)
 
         if error_code == 0:
-            with open('/home/tsec/reports/cowrie_report.csv','a',newline='') as out_file:
+            with open('/home/tsec/Quantas/tpot/reports/cowrie_report.csv','a',newline='') as out_file:
                 writer = csv.writer(out_file)
                 writer.writerow(row)
     else:
         not_ok_report.add(log["shasum"])
 
-with open('/home/tsec/reports/cowrie_not_logged_shasum.txt','w') as f:
+with open('/home/tsec/Quantas/tpot/reports/cowrie_not_logged_shasum.txt','w') as f:
     not_logged_shasum_report = report_dict.keys() - ok_report
     not_logged_shasum_report = not_logged_shasum_report - not_ok_report
 
     for x in not_logged_shasum_report:
         f.write(str(x) + "\n")
 
-with open('/home/tsec/reports/cowrie_ok.txt','w') as f:
+with open('/home/tsec/Quantas/tpot/reports/cowrie_ok.txt','w') as f:
     for x in ok_report:
         f.write(str(x) + "\n")
 
-with open('/home/tsec/reports/cowrie_not_ok.txt','w') as f:
+with open('/home/tsec/Quantas/tpot/reports/cowrie_not_ok.txt','w') as f:
     for x in not_ok_report:
         f.write(str(x) + "\n")
 

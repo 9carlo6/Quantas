@@ -127,7 +127,7 @@ for line in sandbox_lines:
 sandbox_file.close()
 
 # Creazione file di analisi globale (sandbox)
-with open('/home/tsec/reports/dionaea_report.csv','w',newline='') as out_file:
+with open('/home/tsec/Quantas/tpot/reports/dionaea_report.csv','w',newline='') as out_file:
     writer = csv.writer(out_file)
     writer.writerow(header)
 
@@ -155,7 +155,7 @@ for rep in report_dict.keys():
     row, error_code = normalize_json(report_dict[rep])
 
     if error_code == 0:
-        with open('/home/tsec/reports/dionaea_report.csv','a',newline='') as out_file:
+        with open('/home/tsec/Quantas/tpot/reports/dionaea_report.csv','a',newline='') as out_file:
             writer = csv.writer(out_file)
             writer.writerow(row)
 
