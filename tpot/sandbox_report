@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Generazione dei report
+
+if [ $# -eq 1 ]
+then
+ argument=$1
+ python3 /home/tsec/Quantas/tpot/sandbox_scripts/$argument\_report_generator.py
+else
+ echo "Inserisci uno dei seguenti argomenti: 'cowrie', 'dionaea'"
+fi

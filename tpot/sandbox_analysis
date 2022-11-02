@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Analisi dei malware intercettati dalle honeypot
+
+if [ $# -eq 1 ]
+then
+ argument=$1
+ cd /data/$argument
+ python3 /home/tsec/Quantas/tpot/sandbox_scripts/sandbox_automation.py $argument
+else
+ echo "Inserisci uno dei seguenti argomenti: 'cowrie', 'dionaea'"
+fi
