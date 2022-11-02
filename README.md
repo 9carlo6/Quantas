@@ -10,7 +10,7 @@ Codice collegato al framework [T-Pot](https://github.com/telekom-security/tpotce
 ### Configurazione
 Per il corretto funzionamento del codice collegato al famework [T-Pot](https://github.com/telekom-security/tpotce) occorre eseguire il seguente comando:
 ```bash
-  ./tpot_configuration
+  make
 ```
 ### Sandbox Scripts
 Analisi dati Cowrie:
