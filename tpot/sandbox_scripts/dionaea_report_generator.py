@@ -116,49 +116,51 @@ def normalize_json(single_sandbox_json):
 
     return row, 0
 
-#---------------------------------------------
+def main():
+    # File che contiene gli id delle analisi effettuate sulla sandbox
+    sandbox_file = open('/data/dionaea/dionaea_analysis.txt', 'r')
+    sandbox_lines = sandbox_file.readlines()
+    sandbox_newlist = list()
+    for line in sandbox_lines:
+        sandbox_newlist.append(line.strip())
+    sandbox_file.close()
 
-# File che contiene gli id delle analisi effettuate sulla sandbox
-sandbox_file = open('/data/dionaea/dionaea_analysis.txt', 'r')
-sandbox_lines = sandbox_file.readlines()
-sandbox_newlist = list()
-for line in sandbox_lines:
-    sandbox_newlist.append(line.strip())
-sandbox_file.close()
+    # Creazione file di analisi globale (sandbox)
+    with open('/home/tsec/Quantas/tpot/reports/dionaea_report.csv','w',newline='') as out_file:
+        writer = csv.writer(out_file)
+        writer.writerow(header)
 
-# Creazione file di analisi globale (sandbox)
-with open('/home/tsec/Quantas/tpot/reports/dionaea_report.csv','w',newline='') as out_file:
-    writer = csv.writer(out_file)
-    writer.writerow(header)
+    report_dict = dict()
 
-report_dict = dict()
+    # Collezione di tutti i report della sandbox
+    for element in sandbox_newlist:
+        headers = {
+            'Authorization': 'Bearer 0978fce771feb88066139a174ce8f2d5f08a53d6'
+        }
+        response = requests.get('https://private.tria.ge/api/v0/samples/'+element+'/overview.json', headers=headers)
+        sandbox_json = json.loads(response.text)
 
-# Collezione di tutti i report della sandbox
-for element in sandbox_newlist:
-    headers = {
-        'Authorization': 'Bearer 0978fce771feb88066139a174ce8f2d5f08a53d6'
-    }
-    response = requests.get('https://private.tria.ge/api/v0/samples/'+element+'/overview.json', headers=headers)
-    sandbox_json = json.loads(response.text)
+        if  "error" not in sandbox_json.keys():
+            shasum = sandbox_json["sample"]["sha256"]
+            print (sandbox_json["sample"]["sha256"])
+            report_dict[shasum] = sandbox_json
+        else:
+            print(element + " ha dato errore come risposta ")
 
-    if  "error" not in sandbox_json.keys():
-        shasum = sandbox_json["sample"]["sha256"]
-        print (sandbox_json["sample"]["sha256"])
-        report_dict[shasum] = sandbox_json
-    else:
-        print(element + " ha dato errore come risposta ")
+    print("Inizio popolazione file di analisi globale")
 
-print("Inizio popolazione file di analisi globale")
+    # Popolazione file di analisi globale (sandbox)
+    for rep in report_dict.keys():
+        row, error_code = normalize_json(report_dict[rep])
 
-# Popolazione file di analisi globale (sandbox)
-for rep in report_dict.keys():
-    row, error_code = normalize_json(report_dict[rep])
+        if error_code == 0:
+            with open('/home/tsec/Quantas/tpot/reports/dionaea_report.csv','a',newline='') as out_file:
+                writer = csv.writer(out_file)
+                writer.writerow(row)
 
-    if error_code == 0:
-        with open('/home/tsec/Quantas/tpot/reports/dionaea_report.csv','a',newline='') as out_file:
-            writer = csv.writer(out_file)
-            writer.writerow(row)
+    print('File csv update')
 
-print('File csv update')
+if __name__ == "__main__":
+    main()
 
 __author__ = "Carlo Pannullo"
