@@ -13,3 +13,5 @@ general:
 	touch /home/tsec/Quantas/tpot/reports/cowrie_not_logged_shasum.txt
 	touch /home/tsec/Quantas/tpot/reports/cowrie_ok.txt
 	touch /home/tsec/Quantas/tpot/reports/cowrie_not_ok.txt
+	mkdir -p /data/cowrie/log/global_logs
+	touch /data/cowrie/log/global_logs.json
