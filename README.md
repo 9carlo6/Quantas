@@ -6,7 +6,6 @@ Codice collegato al framework [T-Pot](https://github.com/telekom-security/tpotce
 
 ### Pre-Requisiti
 - python3
-  - pandas
 
 ### Configurazione
 Per il corretto funzionamento del codice collegato al famework [T-Pot](https://github.com/telekom-security/tpotce) occorre eseguire il seguente comando:
