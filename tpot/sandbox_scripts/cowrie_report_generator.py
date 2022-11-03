@@ -177,10 +177,8 @@ def main():
     ok_report = set()
     not_ok_report = set()
 
-    print("Inizio popolazione file di analisi globale")
-
     # Popolazione file di analisi globale (sandbox + log)
-    with Bar('Processing...') as bar:
+    with Bar('Popolazione file di analisi globale...', max=len(tpot_json)) as bar:
         for log in tpot_json:
             if log["shasum"] in report_dict.keys():
 
