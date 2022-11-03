@@ -3,18 +3,18 @@ import csv
 import requests
 import pandas as pd
 import os
-from time import sleep
 from progress.bar import Bar
 
-header = ['t-pot_ip_ext','honeypot','id','target','timestamp','src_ip','tag_d1','tag_d2','tag_d3','family_d','score_d','tag_s1','tag_s2','tag_s3','family_s','score_s','platform']
+header = ['honeypot','sandbox_id','target','timestamp','src_ip','tag_d1','tag_d2','tag_d3','family_d','score_d','tag_s1','tag_s2','tag_s3','family_s','score_s','platform']
 
+# Funzione necessaria per generare il file csv
 def normalize_json(single_sandbox_json, log):
     row=list()
 
+    # Se e' presente un errore nel file json ritorna 1
     if "error" in single_sandbox_json.keys():
         return None, 1
 
-    row.append("212.35.201.182")
     row.append("Cowrie")
     row.append(single_sandbox_json["sample"]["id"])
     row.append(single_sandbox_json["sample"]["target"])
@@ -24,6 +24,7 @@ def normalize_json(single_sandbox_json, log):
     tags_d=list()
     tags_s=list()
 
+    # Valori di default
     platform = "-"
     score_d = "-1"
     score_s = "-"
@@ -50,6 +51,7 @@ def normalize_json(single_sandbox_json, log):
             if "score" in single_sandbox_json["tasks"][t].keys():
                 score_s = single_sandbox_json["tasks"][t]["score"]
 
+    # Valori di default
     tag_d1="-"
     tag_d2="-"
     tag_d3="-"
@@ -137,7 +139,7 @@ def main():
     # Stampa del numero dei log di cowrie
     print("I log di cowrie sono: " + str(len(tpot_json)))
 
-    # Viene aperto il file che contiene gli id delle analisi effettuate
+    # Apertura del file che contiene gli id delle analisi effettuate
     # sulla sandbox per generare una lista (sandbox_newlist)
     sandbox_file = open('/data/cowrie/cowrie_analysis.txt', 'r')
     sandbox_lines = sandbox_file.readlines()
@@ -168,7 +170,7 @@ def main():
         else:
             # DEBUG
             print("Non e' stato possibile analizzare correttamente il seguente file: " + element)
-            not_analyzed_files=not_analyzed_files+1
+            not_analyzed_files = not_analyzed_files + 1
 
     # DEBUG
     # Stampa del numero di elementi che non sono stati analizzati dalla sandbox
@@ -193,7 +195,6 @@ def main():
                         writer.writerow(row)
             else:
                 not_ok_report.add(log["shasum"])
-            sleep(0.02)
             bar.next()
 
     # DEBUG
