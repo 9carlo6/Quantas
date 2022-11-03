@@ -172,7 +172,7 @@ def main():
 
     # DEBUG
     # Stampa del numero di elementi che non sono stati analizzati dalla sandbox
-    print(not_analyzed_files + " file non sono stati analizzati correttamente dalla sandbox")
+    print(str(not_analyzed_files) + " file non sono stati analizzati correttamente dalla sandbox")
 
     ok_report = set()
     not_ok_report = set()
