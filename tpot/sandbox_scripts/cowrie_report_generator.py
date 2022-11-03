@@ -3,6 +3,8 @@ import csv
 import requests
 import pandas as pd
 import os
+from time import sleep
+from progress.bar import Bar
 
 header = ['t-pot_ip_ext','honeypot','id','target','timestamp','src_ip','tag_d1','tag_d2','tag_d3','family_d','score_d','tag_s1','tag_s2','tag_s3','family_s','score_s','platform']
 
@@ -119,20 +121,24 @@ def normalize_json(single_sandbox_json, log):
     return row, 0
 
 def main():
-    # Estrazione log
+    # Aggregazione di tutti i file di log generati dall'honeypot cowrie
+    # in un unico file di log chiamato global_logs.json
     os.system('zcat /data/cowrie/log/cowrie.json.*.gz | grep outfile > /data/cowrie/log/global_logs/global_logs.json')
     os.system('cat /data/cowrie/log/cowrie.json.?????????? | grep outfile >> /data/cowrie/log/global_logs/global_logs.json')
 
-    # File che contiene i log
+    # Apertura del file precedentemente, che contiene tutti i log di cowrie
     tpot_json = []
     with open('/data/cowrie/log/global_logs/global_logs.json', 'r') as f:
         for l in f:
             log = json.loads(l)
             tpot_json.append(log)
 
-    print("DEBUG: i log totali sono "+str(len(tpot_json)))
+    # DEBUG
+    # Stampa del numero dei log di cowrie
+    print("I log di cowrie sono: " + str(len(tpot_json)))
 
-    # File che contiene gli id delle analisi effettuate sulla sandbox
+    # Viene aperto il file che contiene gli id delle analisi effettuate
+    # sulla sandbox per generare una lista (sandbox_newlist)
     sandbox_file = open('/data/cowrie/cowrie_analysis.txt', 'r')
     sandbox_lines = sandbox_file.readlines()
     sandbox_newlist = list()
@@ -140,12 +146,13 @@ def main():
         sandbox_newlist.append(line.strip())
     sandbox_file.close()
 
-    # Creazione file di analisi globale (sandbox + log)
+    # Creazione del file di analisi globale (analisi sandbox + log)
     with open('/home/tsec/Quantas/tpot/reports/cowrie_report.csv','w',newline='') as out_file:
         writer = csv.writer(out_file)
         writer.writerow(header)
 
     report_dict = dict()
+    not_analyzed_files = 0
 
     # Collezione di tutti i report della sandbox
     for element in sandbox_newlist:
@@ -159,28 +166,41 @@ def main():
             shasum = sandbox_json["sample"]["sha256"]
             report_dict[shasum] = sandbox_json
         else:
-            print(element + " ha dato errore come risposta ")
+            # DEBUG
+            print("Non e' stato possibile analizzare correttamente il seguente file: " + element)
+            not_analyzed_files=not_analyzed_files+1
+
+    # DEBUG
+    # Stampa del numero di elementi che non sono stati analizzati dalla sandbox
+    print(not_analyzed_files + " file non sono stati analizzati correttamente dalla sandbox")
 
     ok_report = set()
     not_ok_report = set()
 
     print("Inizio popolazione file di analisi globale")
+
     # Popolazione file di analisi globale (sandbox + log)
-    for log in tpot_json:
-        if log["shasum"] in report_dict.keys():
+    with Bar('Processing...') as bar:
+        for log in tpot_json:
+            if log["shasum"] in report_dict.keys():
 
-            ok_report.add(log["shasum"])
+                ok_report.add(log["shasum"])
 
-            single_sandbox_json = report_dict[log["shasum"]]
-            row, error_code = normalize_json(single_sandbox_json, log)
+                single_sandbox_json = report_dict[log["shasum"]]
+                row, error_code = normalize_json(single_sandbox_json, log)
 
-            if error_code == 0:
-                with open('/home/tsec/Quantas/tpot/reports/cowrie_report.csv','a',newline='') as out_file:
-                    writer = csv.writer(out_file)
-                    writer.writerow(row)
-        else:
-            not_ok_report.add(log["shasum"])
+                if error_code == 0:
+                    with open('/home/tsec/Quantas/tpot/reports/cowrie_report.csv','a',newline='') as out_file:
+                        writer = csv.writer(out_file)
+                        writer.writerow(row)
+            else:
+                not_ok_report.add(log["shasum"])
+            sleep(0.02)
+            bar.next()
 
+    # DEBUG
+    # Creazione di un file contenente tutti i file che non sono presenti
+    # nel log globale
     with open('/home/tsec/Quantas/tpot/reports/cowrie_not_logged_shasum.txt','w') as f:
         not_logged_shasum_report = report_dict.keys() - ok_report
         not_logged_shasum_report = not_logged_shasum_report - not_ok_report
@@ -188,15 +208,23 @@ def main():
         for x in not_logged_shasum_report:
             f.write(str(x) + "\n")
 
+    # DEBUG
+    # Creazione di un file contenente tutti i file che sono stati
+    # analizzati in maniera corretta
     with open('/home/tsec/Quantas/tpot/reports/cowrie_ok.txt','w') as f:
         for x in ok_report:
             f.write(str(x) + "\n")
 
+    # DEBUG
+    # Creazione di un file contenente tutti i file che non sono stati
+    # analizzati in maniera corretta
     with open('/home/tsec/Quantas/tpot/reports/cowrie_not_ok.txt','w') as f:
         for x in not_ok_report:
             f.write(str(x) + "\n")
 
-    print('File csv update')
+    # DEBUG
+    # Fine della generazione del file di analisi globale
+    print('Report di Cowrie Aggiornato')
 
 
 if __name__ == "__main__":
