@@ -162,7 +162,7 @@ def main():
     print("Inizio popolazione file di analisi globale")
 
     # Popolazione file di analisi globale (sandbox)
-    with Bar('Popolazione file di analisi globale...', max=len(tpot_json)) as bar:
+    with Bar('Popolazione file di analisi globale...', max=len(report_dict.keys())) as bar:
         for rep in report_dict.keys():
             row, error_code = normalize_json(report_dict[rep])
 
